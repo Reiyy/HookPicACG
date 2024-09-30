@@ -44,6 +44,19 @@ public class MainHook implements IXposedHookLoadPackage {
                     }
                 });
         XposedHelpers.findAndHookMethod(
+                "com.picacomic.fregata.activities.MainActivity",
+                lpparam.classLoader,
+                "onCreate",
+                Bundle.class,
+                new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        XposedBridge.log("afterHookedMethod: MainActivity.onCreate(Bundle)");
+                        View[] buttons_tabbar = (View[]) XposedHelpers.getObjectField(param.thisObject, "buttons_tabbar");
+                        buttons_tabbar[2].setVisibility(View.GONE);
+                    }
+                });
+        XposedHelpers.findAndHookMethod(
                 "com.picacomic.fregata.adapters.ComicPageRecyclerViewAdapter",
                 lpparam.classLoader,
                 "onCreateViewHolder",
