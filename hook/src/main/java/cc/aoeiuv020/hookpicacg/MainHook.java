@@ -97,20 +97,25 @@ public class MainHook implements IXposedHookLoadPackage {
             new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    // 获取 kD 列表
-                    List<DefaultCategoryObject> kD = (List<DefaultCategoryObject>) XposedHelpers.getObjectField(param.thisObject, "kD");
+                    // 使用反射获取 kD 字段
+                    Object kD = XposedHelpers.getObjectField(param.thisObject, "kD");
 
-                    // 使用反射移除特定的分类对象
-                    if (kD != null) {
-                        DefaultCategoryObject objectToRemove = null;
-                        for (DefaultCategoryObject categoryObject : kD) {
-                            if (categoryObject != null && categoryObject.title.equals(param.thisObject.getString(R.string.category_title_ads))) {
-                                objectToRemove = categoryObject;
-                                break;
+                    if (kD instanceof java.util.List) {
+                        // 通过反射获取 DefaultCategoryObject 类
+                        Class<?> defaultCategoryObjectClass = Class.forName("com.picacomic.fregata.objects.DefaultCategoryObject");
+
+                        // 获取 category_title_ads 字段
+                        String categoryTitleAds = (String) param.thisObject.getClass().getMethod("getString", int.class)
+                                .invoke(param.thisObject, (int) Class.forName("com.picacomic.fregata.R$string").getField("category_title_ads").get(null));
+
+                        // 遍历并移除特定的分类对象
+                        java.util.List<?> kDList = (java.util.List<?>) kD;
+                        for (int i = kDList.size() - 1; i >= 0; i--) {
+                            Object categoryObject = kDList.get(i);
+                            String title = (String) defaultCategoryObjectClass.getField("title").get(categoryObject);
+                            if (title.equals(categoryTitleAds)) {
+                                kDList.remove(i);
                             }
-                        }
-                        if (objectToRemove != null) {
-                            kD.remove(objectToRemove);
                         }
                     }
                 }
