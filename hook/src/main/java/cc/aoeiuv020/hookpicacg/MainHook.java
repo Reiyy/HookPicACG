@@ -13,8 +13,6 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
-import java.util.ArrayList;
-import com.picacomic.fregata.models.DefaultCategoryObject; 
 
 @SuppressWarnings("RedundantThrows")
 public class MainHook implements IXposedHookLoadPackage {
@@ -99,42 +97,47 @@ public class MainHook implements IXposedHookLoadPackage {
                 new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                        ArrayList<DefaultCategoryObject> kD = (ArrayList<DefaultCategoryObject>) XposedHelpers.getObjectField(param.thisObject, "kD");
+                        ArrayList<Object> kD = (ArrayList<Object>) XposedHelpers.getObjectField(param.thisObject, "kD");
                         if (kD != null) {
-                            kD.clear(); // 清空列表以避免重复添加
-                            Context context = (Context) XposedHelpers.getObjectField(param.thisObject, "mContext"); // 获取上下文
+                            kD.clear(); // 清空列表，防止重复添加
                             for (int i = 0; i < 8; i++) {
-                                DefaultCategoryObject defaultCategoryObject = null;
                                 if (i == 3) {
                                     continue; // 跳过 ads 分类
                                 }
-                                switch (i) {
-                                    case 0:
-                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_support), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_support), R.drawable.cat_support);
-                                        break;
-                                    case 1:
-                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_leaderboard), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_leaderboard), R.drawable.cat_leaderboard);
-                                        break;
-                                    case 2:
-                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_game), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_game), R.drawable.cat_game);
-                                        break;
-                                    case 4:
-                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_love_pica), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_love_pica), R.drawable.cat_love_pica);
-                                        break;
-                                    case 5:
-                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_pica_forum), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_pica_forum), R.drawable.cat_forum);
-                                        break;
-                                    case 6:
-                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_latest), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_latest), R.drawable.cat_latest);
-                                        break;
-                                    case 7:
-                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_random), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_random), R.drawable.cat_random);
-                                        break;
-                                }
-                                if (defaultCategoryObject != null) {
-                                    kD.add(defaultCategoryObject);
-                                }
+
+                                // 使用反射创建 DefaultCategoryObject 实例
+                                Class<?> defaultCategoryClass = XposedHelpers.findClass("com.picacomic.fregata.models.DefaultCategoryObject", lpparam.classLoader);
+                                String title = (String) XposedHelpers.callMethod(param.thisObject, "getString", getStringResourceId(i)); // 获取对应字符串资源ID
+                                Object defaultCategoryObject = XposedHelpers.newInstance(defaultCategoryClass, "", title, title, getDrawableResourceId(i));
+                                
+                                kD.add(defaultCategoryObject);
                             }
+                        }
+                    }
+
+                    private int getStringResourceId(int index) {
+                        switch (index) {
+                            case 0: return R.string.category_title_support;
+                            case 1: return R.string.category_title_leaderboard;
+                            case 2: return R.string.category_title_game;
+                            case 4: return R.string.category_title_love_pica;
+                            case 5: return R.string.category_title_pica_forum;
+                            case 6: return R.string.category_title_latest;
+                            case 7: return R.string.category_title_random;
+                            default: return 0; // 默认值
+                        }
+                    }
+
+                    private int getDrawableResourceId(int index) {
+                        switch (index) {
+                            case 0: return R.drawable.cat_support;
+                            case 1: return R.drawable.cat_leaderboard;
+                            case 2: return R.drawable.cat_game;
+                            case 4: return R.drawable.cat_love_pica;
+                            case 5: return R.drawable.cat_forum;
+                            case 6: return R.drawable.cat_latest;
+                            case 7: return R.drawable.cat_random;
+                            default: return 0; // 默认值
                         }
                     }
                 });
