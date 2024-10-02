@@ -91,51 +91,22 @@ public class MainHook implements IXposedHookLoadPackage {
             }
         });
         XposedHelpers.findAndHookMethod(
-            "com.picacomic.fregata.activities.LoginActivity",
+            "com.picacomic.fregata.activities.SplashActivity",
             lpparam.classLoader,
             "onCreate",
             Bundle.class,
             new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    Context context = (Context) param.thisObject;
-                    
-                    // 移动构造 Retrofit 的代码到这里
-                    Retrofit build;
-                    OkHttpClient.Builder builder = new OkHttpClient.Builder();
-                    new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
-                    try {
-                        TrustManager[] trustManagerArr = {new X509TrustManager() {
-                            @Override
-                            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+                    SplashActivity splashActivity = (SplashActivity) param.thisObject;
 
-                            @Override
-                            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+                    // 隐藏 SplashActivity 界面
+                    splashActivity.finish(); // 结束当前的 SplashActivity
 
-                            @Override
-                            public X509Certificate[] getAcceptedIssuers() {
-                                return new X509Certificate[0];
-                            }
-                        }};
-                        SSLContext sSLContext = SSLContext.getInstance("SSL");
-                        sSLContext.init(null, trustManagerArr, new SecureRandom());
-                        builder.sslSocketFactory(sSLContext.getSocketFactory(), (X509TrustManager) trustManagerArr[0]);
-                        builder.hostnameVerifier((str, session) -> true);
-                        
-                        OkHttpClient build2 = builder.build();
-                        // 直接使用指定的 URL
-                        build = new Retrofit.Builder()
-                                .baseUrl("http://68.183.234.72/")
-                                .addConverterFactory(GsonConverterFactory.create())
-                                .client(build2)
-                                .build();
-                        
-                        // 创建 Retrofit 接口实例
-                        a ty = build.create(a.class);
-                        
-                        // 如果需要，可以保存 ty 的引用到合适的地方
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+                    // 自动点击 button_server1
+                    Button button_server1 = splashActivity.button_server1;
+                    if (button_server1 != null) {
+                        button_server1.performClick(); // 模拟点击
                     }
                 }
             });
