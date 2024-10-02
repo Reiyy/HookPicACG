@@ -101,7 +101,8 @@ public class MainHook implements IXposedHookLoadPackage {
                     Object kD = XposedHelpers.getObjectField(param.thisObject, "kD");
 
                     if (kD instanceof java.util.List) {
-                        java.util.List<?> kDList = (java.util.List<?>) kD;
+                        // 使用原始类型 List
+                        java.util.List kDList = (java.util.List) kD;
 
                         // 清空列表以重新添加分类
                         kDList.clear();
@@ -116,9 +117,9 @@ public class MainHook implements IXposedHookLoadPackage {
                             // 反射创建 DefaultCategoryObject
                             Class<?> defaultCategoryObjectClass = Class.forName("com.picacomic.fregata.objects.DefaultCategoryObject");
                             Object defaultCategoryObject = defaultCategoryObjectClass.getConstructor(String.class, String.class, String.class, int.class)
-                                    .newInstance("", param.thisObject.getClass().getMethod("getString", int.class).invoke(param.thisObject, (int) Class.forName("com.picacomic.fregata.R$string").getField("category_title_" + getCategoryName(i)).get(null)),
-                                            param.thisObject.getClass().getMethod("getString", int.class).invoke(param.thisObject, (int) Class.forName("com.picacomic.fregata.R$string").getField("category_title_" + getCategoryName(i)).get(null)),
-                                            getDrawableId(i));
+                                    .newInstance("", invokeGetString(param.thisObject, "category_title_" + getCategoryName(i)),
+                                            invokeGetString(param.thisObject, "category_title_" + getCategoryName(i)),
+                                            invokeGetDrawableId(i));
 
                             // 添加到 kD 列表
                             kDList.add(defaultCategoryObject);
@@ -140,17 +141,15 @@ public class MainHook implements IXposedHookLoadPackage {
                     }
                 }
 
-                private int getDrawableId(int i) {
-                    switch (i) {
-                        case 0: return R.drawable.cat_support;
-                        case 1: return R.drawable.cat_leaderboard;
-                        case 2: return R.drawable.cat_game;
-                        case 4: return R.drawable.cat_love_pica;
-                        case 5: return R.drawable.cat_forum;
-                        case 6: return R.drawable.cat_latest;
-                        case 7: return R.drawable.cat_random;
-                        default: return 0;
-                    }
+                private int invokeGetDrawableId(int i) throws Exception {
+                    // 通过反射获取 Drawable ID
+                    String drawableName = "cat_" + getCategoryName(i);
+                    return (int) Class.forName("com.picacomic.fregata.R$drawable").getField(drawableName).get(null);
+                }
+
+                private String invokeGetString(Object context, String resName) throws Exception {
+                    return (String) context.getClass().getMethod("getString", int.class)
+                            .invoke(context, Class.forName("com.picacomic.fregata.R$string").getField(resName).getInt(null));
                 }
             });
     }
