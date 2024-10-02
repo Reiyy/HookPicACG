@@ -97,31 +97,26 @@ public class MainHook implements IXposedHookLoadPackage {
             new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    // 获取 kD 列表
                     Object kD = XposedHelpers.getObjectField(param.thisObject, "kD");
 
                     if (kD instanceof java.util.List) {
-                        // 使用原始类型 List
                         java.util.List kDList = (java.util.List) kD;
-
-                        // 清空列表以重新添加分类
                         kDList.clear();
 
-                        // 遍历 0 到 7 的分类索引
                         for (int i = 0; i < 8; i++) {
-                            // 跳过 case 3
                             if (i == 3) {
-                                continue;
+                                continue; // 跳过 case 3
                             }
 
+                            // 动态加载 DefaultCategoryObject
+                            Class<?> defaultCategoryObjectClass = Class.forName("com.picacomic.fregata.objects.DefaultCategoryObject", true, lpparam.classLoader);
+                            
                             // 反射创建 DefaultCategoryObject
-                            Class<?> defaultCategoryObjectClass = Class.forName("com.picacomic.fregata.objects.DefaultCategoryObject");
                             Object defaultCategoryObject = defaultCategoryObjectClass.getConstructor(String.class, String.class, String.class, int.class)
                                     .newInstance("", invokeGetString(param.thisObject, "category_title_" + getCategoryName(i)),
                                             invokeGetString(param.thisObject, "category_title_" + getCategoryName(i)),
                                             invokeGetDrawableId(i));
 
-                            // 添加到 kD 列表
                             kDList.add(defaultCategoryObject);
                         }
                     }
