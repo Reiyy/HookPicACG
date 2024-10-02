@@ -99,7 +99,11 @@ public class MainHook implements IXposedHookLoadPackage {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     Object splashActivity = param.thisObject;
-                    Button button_server1 = (Button) XposedHelpers.getObjectField(splashActivity, "button_server1");
+                    
+                    // 动态获取 button_server1
+                    Object buttonServer1Object = XposedHelpers.getObjectField(splashActivity, "button_server1");
+                    Class<?> buttonClass = XposedHelpers.findClass("android.widget.Button", lpparam.classLoader);
+                    Button button_server1 = (Button) buttonClass.cast(buttonServer1Object); // 使用 cast 方法进行转换
 
                     // 结束 SplashActivity
                     XposedHelpers.callMethod(splashActivity, "finish");
