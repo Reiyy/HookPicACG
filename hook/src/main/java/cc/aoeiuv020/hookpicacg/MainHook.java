@@ -98,15 +98,15 @@ public class MainHook implements IXposedHookLoadPackage {
             new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    SplashActivity splashActivity = (SplashActivity) param.thisObject;
+                    Object splashActivity = param.thisObject;
+                    Button button_server1 = (Button) XposedHelpers.getObjectField(splashActivity, "button_server1");
 
-                    // 隐藏 SplashActivity 界面
-                    splashActivity.finish(); // 结束当前的 SplashActivity
+                    // 结束 SplashActivity
+                    XposedHelpers.callMethod(splashActivity, "finish");
 
-                    // 自动点击 button_server1
-                    Button button_server1 = splashActivity.button_server1;
+                    // 模拟点击 button_server1
                     if (button_server1 != null) {
-                        button_server1.performClick(); // 模拟点击
+                        button_server1.performClick();
                     }
                 }
             });
