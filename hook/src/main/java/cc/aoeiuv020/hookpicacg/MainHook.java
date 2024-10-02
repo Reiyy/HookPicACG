@@ -91,52 +91,51 @@ public class MainHook implements IXposedHookLoadPackage {
             }
         });
         XposedHelpers.findAndHookMethod(
-            "com.picacomic.fregata.fragments.CategoryFragment",
+            "com.picacomic.fregata.activities.LoginActivity",
             lpparam.classLoader,
-            "ci",
+            "onCreate",
+            Bundle.class,
             new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    Object kD = XposedHelpers.getObjectField(param.thisObject, "kD");
+                    Context context = (Context) param.thisObject;
+                    
+                    // 移动构造 Retrofit 的代码到这里
+                    Retrofit build;
+                    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                    new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
+                    try {
+                        TrustManager[] trustManagerArr = {new X509TrustManager() {
+                            @Override
+                            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
 
-                    if (kD instanceof java.util.List) {
-                        java.util.List kDList = (java.util.List) kD;
-                        kDList.clear();
+                            @Override
+                            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
 
-                        for (int i = 0; i < 8; i++) {
-                            if (i == 3) {
-                                continue; // 跳过 case 3
+                            @Override
+                            public X509Certificate[] getAcceptedIssuers() {
+                                return new X509Certificate[0];
                             }
-
-                            // 动态加载 DefaultCategoryObject
-                            Class<?> defaultCategoryObjectClass = Class.forName("com.picacomic.fregata.objects.DefaultCategoryObject", true, lpparam.classLoader);
-                            
-                            // 获取当前应用的上下文
-                            Context context = (Context) XposedHelpers.getObjectField(param.thisObject, "mContext");
-
-                            // 动态获取字符串和 drawable 资源
-                            String title = context.getString(context.getResources().getIdentifier("category_title_" + getCategoryName(i), "string", context.getPackageName()));
-                            int drawableId = context.getResources().getIdentifier("cat_" + getCategoryName(i), "drawable", context.getPackageName());
-
-                            // 反射创建 DefaultCategoryObject
-                            Object defaultCategoryObject = defaultCategoryObjectClass.getConstructor(String.class, String.class, String.class, int.class)
-                                    .newInstance("", title, title, drawableId);
-
-                            kDList.add(defaultCategoryObject);
-                        }
-                    }
-                }
-
-                private String getCategoryName(int index) {
-                    switch (index) {
-                        case 0: return "support";
-                        case 1: return "leaderboard";
-                        case 2: return "game";
-                        case 4: return "love_pica";
-                        case 5: return "pica_forum";
-                        case 6: return "latest";
-                        case 7: return "random";
-                        default: return "";
+                        }};
+                        SSLContext sSLContext = SSLContext.getInstance("SSL");
+                        sSLContext.init(null, trustManagerArr, new SecureRandom());
+                        builder.sslSocketFactory(sSLContext.getSocketFactory(), (X509TrustManager) trustManagerArr[0]);
+                        builder.hostnameVerifier((str, session) -> true);
+                        
+                        OkHttpClient build2 = builder.build();
+                        // 直接使用指定的 URL
+                        build = new Retrofit.Builder()
+                                .baseUrl("http://68.183.234.72/")
+                                .addConverterFactory(GsonConverterFactory.create())
+                                .client(build2)
+                                .build();
+                        
+                        // 创建 Retrofit 接口实例
+                        a ty = build.create(a.class);
+                        
+                        // 如果需要，可以保存 ty 的引用到合适的地方
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
                 }
             });
