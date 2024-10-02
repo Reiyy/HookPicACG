@@ -102,21 +102,54 @@ public class MainHook implements IXposedHookLoadPackage {
 
                     if (kD instanceof java.util.List) {
                         java.util.List<?> kDList = (java.util.List<?>) kD;
-                        String categoryTitleAds = (String) param.thisObject.getClass().getMethod("getString", int.class)
-                                .invoke(param.thisObject, (int) Class.forName("com.picacomic.fregata.R$string").getField("category_title_ads").get(null));
 
-                        // 遍历 kDList，寻找要移除的对象
-                        for (int i = kDList.size() - 1; i >= 0; i--) {
-                            Object categoryObject = kDList.get(i);
-                            
-                            // 通过反射获取 title 字段
-                            String title = (String) categoryObject.getClass().getField("title").get(categoryObject);
-                            
-                            // 判断标题是否匹配，若匹配则移除
-                            if (title.equals(categoryTitleAds)) {
-                                kDList.remove(i);
+                        // 清空列表以重新添加分类
+                        kDList.clear();
+
+                        // 遍历 0 到 7 的分类索引
+                        for (int i = 0; i < 8; i++) {
+                            // 跳过 case 3
+                            if (i == 3) {
+                                continue;
                             }
+
+                            // 反射创建 DefaultCategoryObject
+                            Class<?> defaultCategoryObjectClass = Class.forName("com.picacomic.fregata.objects.DefaultCategoryObject");
+                            Object defaultCategoryObject = defaultCategoryObjectClass.getConstructor(String.class, String.class, String.class, int.class)
+                                    .newInstance("", param.thisObject.getClass().getMethod("getString", int.class).invoke(param.thisObject, (int) Class.forName("com.picacomic.fregata.R$string").getField("category_title_" + getCategoryName(i)).get(null)),
+                                            param.thisObject.getClass().getMethod("getString", int.class).invoke(param.thisObject, (int) Class.forName("com.picacomic.fregata.R$string").getField("category_title_" + getCategoryName(i)).get(null)),
+                                            getDrawableId(i));
+
+                            // 添加到 kD 列表
+                            kDList.add(defaultCategoryObject);
                         }
+                    }
+                }
+
+                private String getCategoryName(int i) {
+                    switch (i) {
+                        case 0: return "support";
+                        case 1: return "leaderboard";
+                        case 2: return "game";
+                        // case 3 被跳过
+                        case 4: return "love_pica";
+                        case 5: return "pica_forum";
+                        case 6: return "latest";
+                        case 7: return "random";
+                        default: return "";
+                    }
+                }
+
+                private int getDrawableId(int i) {
+                    switch (i) {
+                        case 0: return R.drawable.cat_support;
+                        case 1: return R.drawable.cat_leaderboard;
+                        case 2: return R.drawable.cat_game;
+                        case 4: return R.drawable.cat_love_pica;
+                        case 5: return R.drawable.cat_forum;
+                        case 6: return R.drawable.cat_latest;
+                        case 7: return R.drawable.cat_random;
+                        default: return 0;
                     }
                 }
             });
