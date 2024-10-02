@@ -91,45 +91,29 @@ public class MainHook implements IXposedHookLoadPackage {
             }
         });
         XposedHelpers.findAndHookMethod(
-                "com.picacomic.fregata.fragments.CategoryFragment",
-                lpparam.classLoader,
-                "ci",
-                new XC_MethodHook() {
-                    @Override
-                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                        Object kD = XposedHelpers.getObjectField(param.thisObject, "kD");
-                        if (kD != null) {
-                            XposedHelpers.callMethod(kD, "clear"); // 清空列表，防止重复添加
-                            for (int i = 0; i < 8; i++) {
-                                if (i == 3) {
-                                    continue; // 跳过 ads 分类
-                                }
+            "com.picacomic.fregata.fragments.CategoryFragment",
+            lpparam.classLoader,
+            "ci",
+            new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    // 获取 kD 列表
+                    List<DefaultCategoryObject> kD = (List<DefaultCategoryObject>) XposedHelpers.getObjectField(param.thisObject, "kD");
 
-                                // 使用反射创建 DefaultCategoryObject 实例
-                                Class<?> defaultCategoryClass = XposedHelpers.findClass("com.picacomic.fregata.models.DefaultCategoryObject", lpparam.classLoader);
-                                String title = (String) XposedHelpers.callMethod(param.thisObject, "getString", getStringResourceId(i, lpparam.classLoader)); // 获取对应字符串资源ID
-                                Object defaultCategoryObject = XposedHelpers.newInstance(defaultCategoryClass, "", title, title, getDrawableResourceId(i, lpparam.classLoader));
-                                
-                                XposedHelpers.callMethod(kD, "add", defaultCategoryObject); // 使用反射添加
+                    // 使用反射移除特定的分类对象
+                    if (kD != null) {
+                        DefaultCategoryObject objectToRemove = null;
+                        for (DefaultCategoryObject categoryObject : kD) {
+                            if (categoryObject != null && categoryObject.title.equals(param.thisObject.getString(R.string.category_title_ads))) {
+                                objectToRemove = categoryObject;
+                                break;
                             }
                         }
-                    }
-
-                    private int getStringResourceId(int index, ClassLoader classLoader) {
-                        try {
-                            return (int) XposedHelpers.callStaticMethod(XposedHelpers.findClass("com.picacomic.fregata.R$string", classLoader), "category_title_" + (index == 0 ? "support" : index == 1 ? "leaderboard" : index == 2 ? "game" : index == 4 ? "love_pica" : index == 5 ? "pica_forum" : index == 6 ? "latest" : index == 7 ? "random" : ""));
-                        } catch (Throwable t) {
-                            return 0; // 返回默认值
+                        if (objectToRemove != null) {
+                            kD.remove(objectToRemove);
                         }
                     }
-
-                    private int getDrawableResourceId(int index, ClassLoader classLoader) {
-                        try {
-                            return (int) XposedHelpers.callStaticMethod(XposedHelpers.findClass("com.picacomic.fregata.R$drawable", classLoader), "cat_" + (index == 0 ? "support" : index == 1 ? "leaderboard" : index == 2 ? "game" : index == 4 ? "love_pica" : index == 5 ? "forum" : index == 6 ? "latest" : index == 7 ? "random" : ""));
-                        } catch (Throwable t) {
-                            return 0; // 返回默认值
-                        }
-                    }
-                });
+                }
+            });
     }
 }
