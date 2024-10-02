@@ -90,5 +90,50 @@ public class MainHook implements IXposedHookLoadPackage {
                 }
             }
         });
+        XposedHelpers.findAndHookMethod(
+                "com.picacomic.fregata.fragments.CategoryFragment",
+                lpparam.classLoader,
+                "ci",
+                new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        ArrayList<DefaultCategoryObject> kD = (ArrayList<DefaultCategoryObject>) XposedHelpers.getObjectField(param.thisObject, "kD");
+                        if (kD != null) {
+                            kD.clear();
+                            for (int i = 0; i < 8; i++) {
+                                DefaultCategoryObject defaultCategoryObject = null;
+                                if (i == 3) {
+                                    continue;
+                                }
+                                switch (i) {
+                                    case 0:
+                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_support), getString(R.string.category_title_support), R.drawable.cat_support);
+                                        break;
+                                    case 1:
+                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_leaderboard), getString(R.string.category_title_leaderboard), R.drawable.cat_leaderboard);
+                                        break;
+                                    case 2:
+                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_game), getString(R.string.category_title_game), R.drawable.cat_game);
+                                        break;
+                                    case 4:
+                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_love_pica), getString(R.string.category_title_love_pica), R.drawable.cat_love_pica);
+                                        break;
+                                    case 5:
+                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_pica_forum), getString(R.string.category_title_pica_forum), R.drawable.cat_forum);
+                                        break;
+                                    case 6:
+                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_latest), getString(R.string.category_title_latest), R.drawable.cat_latest);
+                                        break;
+                                    case 7:
+                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_random), getString(R.string.category_title_random), R.drawable.cat_random);
+                                        break;
+                                }
+                                if (defaultCategoryObject != null) {
+                                    kD.add(defaultCategoryObject);
+                                }
+                            }
+                        }
+                    }
+                });
     }
 }
