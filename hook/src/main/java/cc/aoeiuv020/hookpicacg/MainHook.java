@@ -99,33 +99,34 @@ public class MainHook implements IXposedHookLoadPackage {
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         ArrayList<DefaultCategoryObject> kD = (ArrayList<DefaultCategoryObject>) XposedHelpers.getObjectField(param.thisObject, "kD");
                         if (kD != null) {
-                            kD.clear();
+                            kD.clear(); // 清空列表以避免重复添加
+                            Context context = (Context) XposedHelpers.getObjectField(param.thisObject, "mContext"); // 获取上下文
                             for (int i = 0; i < 8; i++) {
                                 DefaultCategoryObject defaultCategoryObject = null;
                                 if (i == 3) {
-                                    continue;
+                                    continue; // 跳过 ads 分类
                                 }
                                 switch (i) {
                                     case 0:
-                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_support), getString(R.string.category_title_support), R.drawable.cat_support);
+                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_support), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_support), R.drawable.cat_support);
                                         break;
                                     case 1:
-                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_leaderboard), getString(R.string.category_title_leaderboard), R.drawable.cat_leaderboard);
+                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_leaderboard), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_leaderboard), R.drawable.cat_leaderboard);
                                         break;
                                     case 2:
-                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_game), getString(R.string.category_title_game), R.drawable.cat_game);
+                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_game), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_game), R.drawable.cat_game);
                                         break;
                                     case 4:
-                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_love_pica), getString(R.string.category_title_love_pica), R.drawable.cat_love_pica);
+                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_love_pica), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_love_pica), R.drawable.cat_love_pica);
                                         break;
                                     case 5:
-                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_pica_forum), getString(R.string.category_title_pica_forum), R.drawable.cat_forum);
+                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_pica_forum), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_pica_forum), R.drawable.cat_forum);
                                         break;
                                     case 6:
-                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_latest), getString(R.string.category_title_latest), R.drawable.cat_latest);
+                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_latest), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_latest), R.drawable.cat_latest);
                                         break;
                                     case 7:
-                                        defaultCategoryObject = new DefaultCategoryObject("", getString(R.string.category_title_random), getString(R.string.category_title_random), R.drawable.cat_random);
+                                        defaultCategoryObject = new DefaultCategoryObject("", (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_random), (String) XposedHelpers.callMethod(context, "getString", R.string.category_title_random), R.drawable.cat_random);
                                         break;
                                 }
                                 if (defaultCategoryObject != null) {
