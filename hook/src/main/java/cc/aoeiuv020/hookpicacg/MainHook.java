@@ -97,22 +97,22 @@ public class MainHook implements IXposedHookLoadPackage {
             new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    // 使用反射获取 kD 字段
+                    // 获取 kD 列表
                     Object kD = XposedHelpers.getObjectField(param.thisObject, "kD");
 
                     if (kD instanceof java.util.List) {
-                        // 通过反射获取 DefaultCategoryObject 类
-                        Class<?> defaultCategoryObjectClass = Class.forName("com.picacomic.fregata.objects.DefaultCategoryObject");
-
-                        // 获取 category_title_ads 字段
+                        java.util.List<?> kDList = (java.util.List<?>) kD;
                         String categoryTitleAds = (String) param.thisObject.getClass().getMethod("getString", int.class)
                                 .invoke(param.thisObject, (int) Class.forName("com.picacomic.fregata.R$string").getField("category_title_ads").get(null));
 
-                        // 遍历并移除特定的分类对象
-                        java.util.List<?> kDList = (java.util.List<?>) kD;
+                        // 遍历 kDList，寻找要移除的对象
                         for (int i = kDList.size() - 1; i >= 0; i--) {
                             Object categoryObject = kDList.get(i);
-                            String title = (String) defaultCategoryObjectClass.getField("title").get(categoryObject);
+                            
+                            // 通过反射获取 title 字段
+                            String title = (String) categoryObject.getClass().getField("title").get(categoryObject);
+                            
+                            // 判断标题是否匹配，若匹配则移除
                             if (title.equals(categoryTitleAds)) {
                                 kDList.remove(i);
                             }
