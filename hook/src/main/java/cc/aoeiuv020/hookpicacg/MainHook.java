@@ -91,28 +91,27 @@ public class MainHook implements IXposedHookLoadPackage {
             }
         });
         XposedHelpers.findAndHookMethod(
-            "com.picacomic.fregata.activities.SplashActivity",
-            lpparam.classLoader,
-            "onCreate",
-            Bundle.class,
-            new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    Object splashActivity = param.thisObject;
-                    
-                    // 动态获取 button_server1
-                    Object buttonServer1Object = XposedHelpers.getObjectField(splashActivity, "button_server1");
-                    Class<?> buttonClass = XposedHelpers.findClass("android.widget.Button", lpparam.classLoader);
-                    Button button_server1 = (Button) buttonClass.cast(buttonServer1Object); // 使用 cast 方法进行转换
+                "com.picacomic.fregata.activities.SplashActivity",
+                lpparam.classLoader,
+                "onCreate",
+                Bundle.class,
+                new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        Object splashActivity = param.thisObject;
 
-                    // 结束 SplashActivity
-                    XposedHelpers.callMethod(splashActivity, "finish");
+                        // 使用反射查找 Button 类
+                        Class<?> buttonClass = XposedHelpers.findClass("android.widget.Button", lpparam.classLoader);
+                        
+                        // 获取 button_server1
+                        Object button_server1 = XposedHelpers.getObjectField(splashActivity, "button_server1");
 
-                    // 模拟点击 button_server1
-                    if (button_server1 != null) {
-                        button_server1.performClick();
+                        // 模拟点击
+                        XposedHelpers.callMethod(button_server1, "performClick");
+
+                        // 结束 SplashActivity
+                        XposedHelpers.callMethod(splashActivity, "finish");
                     }
-                }
-            });
+                });
     }
 }
