@@ -97,9 +97,9 @@ public class MainHook implements IXposedHookLoadPackage {
                 new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                        ArrayList<Object> kD = (ArrayList<Object>) XposedHelpers.getObjectField(param.thisObject, "kD");
+                        Object kD = XposedHelpers.getObjectField(param.thisObject, "kD");
                         if (kD != null) {
-                            kD.clear(); // 清空列表，防止重复添加
+                            XposedHelpers.callMethod(kD, "clear"); // 清空列表，防止重复添加
                             for (int i = 0; i < 8; i++) {
                                 if (i == 3) {
                                     continue; // 跳过 ads 分类
@@ -107,37 +107,27 @@ public class MainHook implements IXposedHookLoadPackage {
 
                                 // 使用反射创建 DefaultCategoryObject 实例
                                 Class<?> defaultCategoryClass = XposedHelpers.findClass("com.picacomic.fregata.models.DefaultCategoryObject", lpparam.classLoader);
-                                String title = (String) XposedHelpers.callMethod(param.thisObject, "getString", getStringResourceId(i)); // 获取对应字符串资源ID
-                                Object defaultCategoryObject = XposedHelpers.newInstance(defaultCategoryClass, "", title, title, getDrawableResourceId(i));
+                                String title = (String) XposedHelpers.callMethod(param.thisObject, "getString", getStringResourceId(i, lpparam.classLoader)); // 获取对应字符串资源ID
+                                Object defaultCategoryObject = XposedHelpers.newInstance(defaultCategoryClass, "", title, title, getDrawableResourceId(i, lpparam.classLoader));
                                 
-                                kD.add(defaultCategoryObject);
+                                XposedHelpers.callMethod(kD, "add", defaultCategoryObject); // 使用反射添加
                             }
                         }
                     }
 
-                    private int getStringResourceId(int index) {
-                        switch (index) {
-                            case 0: return R.string.category_title_support;
-                            case 1: return R.string.category_title_leaderboard;
-                            case 2: return R.string.category_title_game;
-                            case 4: return R.string.category_title_love_pica;
-                            case 5: return R.string.category_title_pica_forum;
-                            case 6: return R.string.category_title_latest;
-                            case 7: return R.string.category_title_random;
-                            default: return 0; // 默认值
+                    private int getStringResourceId(int index, ClassLoader classLoader) {
+                        try {
+                            return (int) XposedHelpers.callStaticMethod(XposedHelpers.findClass("com.picacomic.fregata.R$string", classLoader), "category_title_" + (index == 0 ? "support" : index == 1 ? "leaderboard" : index == 2 ? "game" : index == 4 ? "love_pica" : index == 5 ? "pica_forum" : index == 6 ? "latest" : index == 7 ? "random" : ""));
+                        } catch (Throwable t) {
+                            return 0; // 返回默认值
                         }
                     }
 
-                    private int getDrawableResourceId(int index) {
-                        switch (index) {
-                            case 0: return R.drawable.cat_support;
-                            case 1: return R.drawable.cat_leaderboard;
-                            case 2: return R.drawable.cat_game;
-                            case 4: return R.drawable.cat_love_pica;
-                            case 5: return R.drawable.cat_forum;
-                            case 6: return R.drawable.cat_latest;
-                            case 7: return R.drawable.cat_random;
-                            default: return 0; // 默认值
+                    private int getDrawableResourceId(int index, ClassLoader classLoader) {
+                        try {
+                            return (int) XposedHelpers.callStaticMethod(XposedHelpers.findClass("com.picacomic.fregata.R$drawable", classLoader), "cat_" + (index == 0 ? "support" : index == 1 ? "leaderboard" : index == 2 ? "game" : index == 4 ? "love_pica" : index == 5 ? "forum" : index == 6 ? "latest" : index == 7 ? "random" : ""));
+                        } catch (Throwable t) {
+                            return 0; // 返回默认值
                         }
                     }
                 });
