@@ -51,13 +51,14 @@ public class MainHook implements IXposedHookLoadPackage {
         urlMap.put("https://cloudflare-dns.com", "https://picaapi.reiyy.com:2333");
         urlMap.put("https://picaapi.picacomic.com", "https://picaapi.reiyy.com:2333");
 
-        // Hook URL.openConnection() 方法
-        XposedHelpers.findAndHookMethod("java.net.URL", lpparam.classLoader, "openConnection",
+        // Hook HttpURLConnection.connect()
+        XposedHelpers.findAndHookMethod("java.net.HttpURLConnection", lpparam.classLoader, "connect",
             new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) {
                     try {
-                        URL oldUrl = (URL) param.thisObject;
+                        HttpURLConnection connection = (HttpURLConnection) param.thisObject;
+                        URL oldUrl = connection.getURL();
                         String oldUrlString = oldUrl.toString();
                         String newUrlString = oldUrlString;
 
@@ -65,14 +66,15 @@ public class MainHook implements IXposedHookLoadPackage {
                         for (Map.Entry<String, String> entry : urlMap.entrySet()) {
                             if (oldUrlString.startsWith(entry.getKey())) {
                                 newUrlString = oldUrlString.replace(entry.getKey(), entry.getValue());
-                                break; // 找到匹配项后跳出
+                                break;
                             }
                         }
 
-                        // 如果 URL 发生了变化，则替换
+                        // 如果 URL 发生了变化，则重新创建 HttpURLConnection
                         if (!oldUrlString.equals(newUrlString)) {
                             URL newUrl = new URL(newUrlString);
-                            param.setResult(newUrl.openConnection());
+                            HttpURLConnection newConnection = (HttpURLConnection) newUrl.openConnection();
+                            param.setResult(newConnection);
                             XposedBridge.log("Modified URL: " + oldUrlString + " -> " + newUrlString);
                         }
                     } catch (Exception e) {
