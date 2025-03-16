@@ -50,10 +50,10 @@ public class MainHook implements IXposedHookLoadPackage {
         final Map<String, String> urlMap = new HashMap<>();
         urlMap.put("https://cloudflare-dns.com", "https://picaapi.reiyy.com:2333");
         urlMap.put("https://picaapi.picacomic.com", "https://picaapi.reiyy.com:2333");
-
+        final Class <?> httpUrlConnection = findClass("java.net.HttpURLConnection",lpparam.classLoader);
         // Hook HttpURLConnection.connect()
-        XposedHelpers.findAndHookMethod("java.net.HttpURLConnection", lpparam.classLoader, "connect",
-            new XC_MethodHook() {
+
+            hookAllConstructors(httpUrlConnection, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) {
                     try {
