@@ -1,4 +1,4 @@
-package cc.aoeiuv020.hookpicacg
+package com.yareiy.hookmypica
 
 import org.junit.Test
 

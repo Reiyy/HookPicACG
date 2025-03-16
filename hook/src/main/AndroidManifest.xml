@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="cc.aoeiuv020.hookpicacg">
+    package="com.yareiy.hookmypica">
 
     <application
         android:allowBackup="true"
@@ -19,7 +19,7 @@
             android:value="true" />
         <meta-data
             android:name="xposeddescription"
-            android:value="给哔咔去广告" />
+            android:value="给MyPica去广告" />
         <meta-data
             android:name="xposedminversion"
             android:value="82" />

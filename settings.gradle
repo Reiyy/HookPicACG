@@ -13,5 +13,5 @@ dependencyResolutionManagement {
         maven { url 'https://api.xposed.info/' }
     }
 }
-rootProject.name = "HookPicACG"
+rootProject.name = "HookMyPica"
 include ':hook'
