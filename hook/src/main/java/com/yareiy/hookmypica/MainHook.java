@@ -22,6 +22,8 @@ import java.net.SocketTimeoutException;
 import java.net.MalformedURLException;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.HashMap;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
