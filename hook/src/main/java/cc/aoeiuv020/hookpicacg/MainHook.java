@@ -136,5 +136,36 @@ public class MainHook implements IXposedHookLoadPackage {
                 }
             }
         });
+        XposedHelpers.findAndHookMethod(
+            "com.picacomic.fregata.adapters.a",
+            lpparam.classLoader,
+            "getView",
+            int.class,
+            View.class,
+            ViewGroup.class,
+            new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    Object adapter = param.thisObject;
+                    int position = (int) param.args[0];
+                    int viewType = (int) XposedHelpers.callMethod(adapter, "getItemViewType", position);
+                    if (viewType == 2) {
+                        ViewGroup parent = (ViewGroup) param.args[2];
+                        Context ctx = parent.getContext();
+                        View convertView = (View) param.args[1];
+                        View emptyView;
+                        // View复用
+                        if (convertView != null && "PICA_AD_KILLER".equals(convertView.getTag())) {
+                            emptyView = convertView; 
+                        } else {
+                            emptyView = new View(ctx);
+                            emptyView.setTag("PICA_AD_KILLER");
+                            // 保留一点，避免影响分页和章节切换
+                            emptyView.setLayoutParams(new android.widget.AbsListView.LayoutParams(1, 1));
+                        }
+                        param.setResult(emptyView);
+                    }
+                }
+            });
     }
 }
